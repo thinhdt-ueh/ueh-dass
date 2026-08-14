@@ -17,6 +17,14 @@ streamlit run app.py
 
 Trình duyệt sẽ tự mở tại `http://localhost:8501`.
 
+## Chạy bằng Docker
+
+```bash
+docker compose up --build
+```
+
+Ứng dụng sẽ chạy tại `http://localhost:8501`. Dùng `docker compose up -d --build` để chạy nền, và `docker compose down` để dừng.
+
 ## Bắt đầu
 
 1. Ở thanh bên trái (sidebar), chọn ngôn ngữ (mặc định English, có thể đổi sang Tiếng Việt), rồi import dữ liệu của bạn (CSV / Excel / SPSS `.sav`), hoặc bấm **"Use sample data (demo)"** để khám phá ngay các chức năng với một bộ dữ liệu khảo sát mẫu (n=200, tự động bằng đúng ngôn ngữ đang chọn).
