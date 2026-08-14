@@ -1,0 +1,5 @@
+[client]
+# Hides the "Deploy" button and the developer-tools menu (Rerun/Clear cache/etc.)
+# from the app's top-right toolbar — this is a local analysis tool, not something
+# meant to be deployed from within the browser UI.
+toolbarMode = "minimal"
