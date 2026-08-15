@@ -27,16 +27,18 @@ docker compose up --build
 
 ## Chạy bằng file .exe (Windows)
 
-Sau khi đã cài đặt (`pip install -r requirements.txt` vào `.venv` trong thư mục dự án), có thể build một file `DASS.exe` để bấm đúp là chạy: tự khởi động máy chủ Streamlit và tự mở trình duyệt tại `http://localhost:8501`, không cần mở terminal hay gõ lệnh.
+File `DASS.exe` (có sẵn trong repo, thư mục gốc) là launcher tự chạy: bấm đúp để tự khởi động máy chủ Streamlit và tự mở trình duyệt tại `http://localhost:8501`, không cần mở terminal hay gõ lệnh.
+
+**Portable — dùng được trên bất kỳ máy Windows nào**, không phụ thuộc đường dẫn hay `.venv` có sẵn: cần tải về **cả thư mục dự án** (không chỉ riêng file `.exe`), giữ `DASS.exe` cùng cấp với `app.py`/`requirements.txt`. Lần chạy đầu tiên, nếu chưa có môi trường Python sẵn sàng, launcher sẽ tự tạo `.venv` mới và tự cài các thư viện cần thiết (cần máy đã cài sẵn Python 3.10+ và có kết nối Internet) — quá trình này mất vài phút; các lần chạy sau sẽ khởi động ngay lập tức. Đóng cửa sổ console (hoặc Ctrl+C) để dừng ứng dụng.
+
+Muốn tự build lại `DASS.exe` từ source:
 
 ```bash
 pip install pyinstaller
 pyinstaller --onefile --console --name DASS --icon assets/logo-ueh.ico launcher.py
 ```
 
-File `DASS.exe` sẽ nằm trong thư mục `dist/`. Copy nó ra **thư mục gốc của dự án** (cùng cấp với `app.py` và `.venv`) rồi bấm đúp để chạy — file exe cần nằm cùng thư mục với `app.py`/`.venv` vì nó dùng đường dẫn tương đối để tìm chúng. Đóng cửa sổ console (hoặc Ctrl+C) để dừng ứng dụng.
-
-File `DASS.exe` đã build sẵn cũng có trong repo này (thư mục gốc) để tải về dùng ngay, không cần tự build.
+File build ra nằm trong thư mục `dist/`, copy ra thư mục gốc của dự án để dùng.
 
 ## Bắt đầu
 
