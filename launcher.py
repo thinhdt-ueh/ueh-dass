@@ -35,16 +35,49 @@ def base_dir() -> str:
     return os.path.dirname(os.path.abspath(__file__))
 
 
+def command_works(cmd: list[str]) -> bool:
+    # On Windows, "python"/"python3" on PATH can resolve to the Microsoft
+    # Store App Execution Alias stub even when no real Python is installed
+    # (it silently fails or opens the Store instead of running). Actually
+    # invoke the candidate to confirm it works before trusting it.
+    try:
+        result = subprocess.run(
+            cmd + ["-c", "print('ok')"],
+            capture_output=True,
+            text=True,
+            timeout=10,
+        )
+        return result.returncode == 0 and "ok" in result.stdout
+    except Exception:
+        return False
+
+
+def is_windows_store_python(exe_path: str) -> bool:
+    # Microsoft Store Python installs live under a virtualized per-package
+    # WindowsApps folder. Direct invocation can appear to work, but venvs
+    # created from it are unreliable: the venv's own generated python.exe
+    # stores a literal path back into that virtualized storage, which can
+    # fail to resolve later ("system cannot find the path specified") -
+    # this is a known Windows/Store-Python issue, not something to patch
+    # around. Skip it entirely and require a real (python.org) install.
+    return "windowsapps" in exe_path.lower()
+
+
 def find_system_python() -> list[str] | None:
     # Prefer the Windows "py" launcher (installed by python.org, finds Python
     # reliably even when it's not on PATH), then fall back to python3/python.
+    candidates: list[list[str]] = []
     py_launcher = shutil.which("py")
-    if py_launcher:
-        return [py_launcher, "-3"]
+    if py_launcher and not is_windows_store_python(py_launcher):
+        candidates.append([py_launcher, "-3"])
     for name in ("python3", "python"):
         exe = shutil.which(name)
-        if exe:
-            return [exe]
+        if exe and not is_windows_store_python(exe):
+            candidates.append([exe])
+
+    for cmd in candidates:
+        if command_works(cmd):
+            return cmd
     return None
 
 
@@ -79,26 +112,51 @@ def ensure_venv(root: str) -> str:
 
     system_python = find_system_python()
     if system_python is None:
-        log("[DASS] LOI: Khong tim thay Python tren may nay.")
+        log("[DASS] LOI: Khong tim thay ban Python phu hop tren may nay.")
+        log("[DASS] (Neu 'python' tren may la ban tu Microsoft Store, ban do khong dung duoc de tao moi truong - can ban Python that tu python.org.)")
         log("[DASS] Vui long cai Python 3.10+ tu https://www.python.org/downloads/ (nho tick 'Add python.exe to PATH'), roi chay lai DASS.exe.")
         input("Nhan Enter de thoat...")
         sys.exit(1)
 
-    if not os.path.isdir(venv_dir):
-        log("[DASS] Dang tao moi truong Python rieng (.venv)...")
-        subprocess.run(system_python + ["-m", "venv", venv_dir], cwd=root, check=True)
+    def fail(msg: str, detail: str = "") -> None:
+        log(f"[DASS] LOI: {msg}")
+        if detail:
+            log(detail[-1500:])
+        shutil.rmtree(venv_dir, ignore_errors=True)
+        input("Nhan Enter de thoat...")
+        sys.exit(1)
+
+    log("[DASS] Dang tao moi truong Python rieng (.venv)...")
+    try:
+        subprocess.run(
+            system_python + ["-m", "venv", venv_dir],
+            cwd=root, check=True, capture_output=True, text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        fail("Khong the tao moi truong .venv.", e.stderr)
+    except Exception as e:
+        fail(f"Khong the tao moi truong .venv: {e}")
 
     venv_py = venv_python_path(venv_dir)
     requirements = os.path.join(root, "requirements.txt")
 
     log("[DASS] Dang cai dat thu vien can thiet (co the mat vai phut trong lan dau)...")
-    subprocess.run([venv_py, "-m", "pip", "install", "--upgrade", "pip"], cwd=root, check=True)
-    subprocess.run([venv_py, "-m", "pip", "install", "-r", requirements], cwd=root, check=True)
+    try:
+        subprocess.run(
+            [venv_py, "-m", "pip", "install", "--upgrade", "pip"],
+            cwd=root, check=True, capture_output=True, text=True,
+        )
+        subprocess.run(
+            [venv_py, "-m", "pip", "install", "-r", requirements],
+            cwd=root, check=True, capture_output=True, text=True,
+        )
+    except subprocess.CalledProcessError as e:
+        fail("Cai dat thu vien khong thanh cong. Vui long kiem tra ket noi Internet roi thu lai.", e.stderr)
+    except Exception as e:
+        fail(f"Cai dat thu vien khong thanh cong: {e}")
 
     if not venv_is_usable(venv_dir):
-        log("[DASS] LOI: Cai dat thu vien khong thanh cong. Vui long kiem tra ket noi Internet roi thu lai.")
-        input("Nhan Enter de thoat...")
-        sys.exit(1)
+        fail("Cai dat xong nhung moi truong van khong hoat dong duoc. Vui long thu lai.")
 
     log("[DASS] Thiet lap xong.")
     return venv_py
