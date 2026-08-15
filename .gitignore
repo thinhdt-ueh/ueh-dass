@@ -26,4 +26,3 @@ _*.py
 build/
 dist/
 *.spec
-DASS.exe

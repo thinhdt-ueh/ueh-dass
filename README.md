@@ -34,7 +34,9 @@ pip install pyinstaller
 pyinstaller --onefile --console --name DASS --icon assets/logo-ueh.ico launcher.py
 ```
 
-File `DASS.exe` sẽ nằm trong thư mục `dist/`. Copy nó ra **thư mục gốc của dự án** (cùng cấp với `app.py` và `.venv`) rồi bấm đúp để chạy — file exe cần nằm cùng thư mục với `app.py`/`.venv` vì nó dùng đường dẫn tương đối để tìm chúng. Đóng cửa sổ console (hoặc Ctrl+C) để dừng ứng dụng. File exe không được đưa vào Git (xem `.gitignore`) vì là sản phẩm build, có thể tự tạo lại bất kỳ lúc nào bằng lệnh trên.
+File `DASS.exe` sẽ nằm trong thư mục `dist/`. Copy nó ra **thư mục gốc của dự án** (cùng cấp với `app.py` và `.venv`) rồi bấm đúp để chạy — file exe cần nằm cùng thư mục với `app.py`/`.venv` vì nó dùng đường dẫn tương đối để tìm chúng. Đóng cửa sổ console (hoặc Ctrl+C) để dừng ứng dụng.
+
+File `DASS.exe` đã build sẵn cũng có trong repo này (thư mục gốc) để tải về dùng ngay, không cần tự build.
 
 ## Bắt đầu
 
