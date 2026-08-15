@@ -25,6 +25,17 @@ docker compose up --build
 
 Ứng dụng sẽ chạy tại `http://localhost:8501`. Dùng `docker compose up -d --build` để chạy nền, và `docker compose down` để dừng.
 
+## Chạy bằng file .exe (Windows)
+
+Sau khi đã cài đặt (`pip install -r requirements.txt` vào `.venv` trong thư mục dự án), có thể build một file `DASS.exe` để bấm đúp là chạy: tự khởi động máy chủ Streamlit và tự mở trình duyệt tại `http://localhost:8501`, không cần mở terminal hay gõ lệnh.
+
+```bash
+pip install pyinstaller
+pyinstaller --onefile --console --name DASS --icon assets/logo-ueh.ico launcher.py
+```
+
+File `DASS.exe` sẽ nằm trong thư mục `dist/`. Copy nó ra **thư mục gốc của dự án** (cùng cấp với `app.py` và `.venv`) rồi bấm đúp để chạy — file exe cần nằm cùng thư mục với `app.py`/`.venv` vì nó dùng đường dẫn tương đối để tìm chúng. Đóng cửa sổ console (hoặc Ctrl+C) để dừng ứng dụng. File exe không được đưa vào Git (xem `.gitignore`) vì là sản phẩm build, có thể tự tạo lại bất kỳ lúc nào bằng lệnh trên.
+
 ## Bắt đầu
 
 1. Ở thanh bên trái (sidebar), chọn ngôn ngữ (mặc định English, có thể đổi sang Tiếng Việt), rồi import dữ liệu của bạn (CSV / Excel / SPSS `.sav`), hoặc bấm **"Use sample data (demo)"** để khám phá ngay các chức năng với một bộ dữ liệu khảo sát mẫu (n=200, tự động bằng đúng ngôn ngữ đang chọn).
