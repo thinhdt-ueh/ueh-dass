@@ -91,7 +91,7 @@ TRANSLATIONS["vi"].update({
 ### Các module chính
 1. **Quản lý & Biến đổi dữ liệu** — Recode (mã hóa/đảo điểm), xử lý dữ liệu khuyết, tính biến mới (Compute)
 2. **Thống kê mô tả** — Frequencies, Descriptives, Crosstabs
-3. **Đánh giá thang đo** — Cronbach's Alpha, Phân tích nhân tố khám phá (EFA)
+3. **Đánh giá thang đo** — Cronbach's Alpha, Phân tích nhân tố khám phá (EFA), Phân tích nhân tố khẳng định (CFA)
 4. **Kiểm định giả thuyết** — Independent/Paired T-test, ANOVA
 5. **Phân tích mối quan hệ** — Tương quan Pearson, Hồi quy tuyến tính/đa biến
 6. **Phi tham số & Đồ thị** — Mann-Whitney U, Kruskal-Wallis, Wilcoxon, Histogram/Scatter/Boxplot/Bar chart
@@ -549,7 +549,7 @@ TRANSLATIONS["en"].update({
 ### Main modules
 1. **Data Management & Transformation** — Recode (recoding/reverse scoring), missing data handling, Compute Variable
 2. **Descriptive Statistics** — Frequencies, Descriptives, Crosstabs
-3. **Scale Evaluation** — Cronbach's Alpha, Exploratory Factor Analysis (EFA)
+3. **Scale Evaluation** — Cronbach's Alpha, Exploratory Factor Analysis (EFA), Confirmatory Factor Analysis (CFA)
 4. **Hypothesis Testing** — Independent/Paired T-test, ANOVA
 5. **Relational Analysis** — Pearson Correlation, Linear/Multiple Regression
 6. **Non-parametric & Graphs** — Mann-Whitney U, Kruskal-Wallis, Wilcoxon, Histogram/Scatter/Boxplot/Bar chart
