@@ -1,6 +1,6 @@
 # DASS — Claude Handover
 
-Tài liệu bàn giao trạng thái dự án, để phiên làm việc sau (người hoặc Claude) tiếp tục mà không phải hỏi lại từ đầu. Cập nhật lần cuối: 2026-08-15.
+Tài liệu bàn giao trạng thái dự án, để phiên làm việc sau (người hoặc Claude) tiếp tục mà không phải hỏi lại từ đầu. Cập nhật lần cuối: 2026-08-16.
 
 ## Dự án là gì
 
@@ -31,6 +31,17 @@ Thư mục dự án trên máy: `C:\Users\thinhdt\UEH-DASS`.
    - **Portable**: không giả định `.venv` có sẵn nữa. Lần chạy đầu, nếu chưa có `.venv` hoạt động được cạnh file exe, tự tạo venv mới + `pip install -r requirements.txt`. Đã verify bằng cách copy cả project (trừ `.venv`) sang thư mục khác và chạy exe từ đó — tự dựng venv, cài xong, server lên, HTTP 200.
    - **Bỏ qua Python bản Microsoft Store** khi tìm system Python (`is_windows_store_python()` — check path chứa `WindowsApps`), vì venv tạo từ Python Store không đáng tin (lỗi đã gặp thật: `did not find executable at ...WindowsApps\PythonSoftwareFoundation.Python.3.13_.../python.exe`). Nếu không tìm được Python "thật" nào, launcher thoát sạch với thông báo rõ ràng hướng dẫn cài Python từ python.org, thay vì crash traceback.
    - Đã test cả 2 case bằng exe đã compile thật (không chỉ script nguồn): (a) máy có `.venv` sẵn — chạy ngay; (b) máy/thư mục mới không có Python thật (chỉ có Store Python, đúng như máy user báo lỗi) — báo lỗi thân thiện, không crash.
+
+## Cập nhật 2026-08-16: thêm CFA (Confirmatory Factor Analysis)
+
+Thêm tab thứ 3 vào `pages/3_✅_Danh_gia_thang_do.py` (cùng file với Cronbach's Alpha, EFA), dùng thư viện **`semopy`** (pure Python, không cần R/lavaan) — đã thêm `semopy>=2.3` vào `requirements.txt`.
+
+- UI: chọn số nhân tố, đặt tên + chọn items cho từng nhân tố (>=2 items/nhân tố), nút Run, checkbox add-to-report theo đúng pattern cũ.
+- Kết quả: model spec (cú pháp `F1 =~ X1 + X2 + ...`), bảng chỉ số phù hợp mô hình (χ², df, CFI, TLI, RMSEA, GFI, AGFI, NFI, AIC, BIC) kèm badge diễn giải, bảng hệ số tải chuẩn hóa (tô đậm ≥0.5), **Composite Reliability (CR) & AVE** per factor (hàm `cr_ave()` mới trong `utils/stats.py`), ma trận tương quan giữa các nhân tố + **Fornell–Larcker discriminant validity check** khi ≥2 nhân tố.
+- 45 key i18n mới (`sc.cfa.*`), đã cross-check VI/EN khớp 1-1.
+- **Gotcha đã gặp và fix**: `semopy.Model.inspect(std_est=True)` trả về cột `Std. Err`/`z-value`/`p-value` là **object dtype trộn lẫn float và chuỗi `"-"`** (marker cho reference-indicator bị fix = 1.0) — đưa thẳng vào `st.dataframe()` sẽ vỡ Arrow serialization (`ArrowTypeError`). Fix: format toàn bộ cột số thành string trước khi hiển thị/xuất báo cáo (xem hàm `_fmt` trong tab CFA).
+- Đã test kỹ bằng `AppTest`: dữ liệu tương quan tốt (fit indices ra đúng ngưỡng "tốt"), dữ liệu random/không có cấu trúc (fit indices ra đúng ngưỡng "kém", kể cả case CFI/TLI âm — hợp lệ về mặt toán học khi model quá tệ), case 1 nhân tố (bỏ qua phần ma trận tương quan), case validate lỗi (factor thiếu item). Đã verify `build_docx_bytes()` xuất Word thành công với đủ 4 bảng.
+- **Chưa test**: `DASS.exe` chưa được rebuild/test lại với `semopy` trong self-provisioning venv (không cần rebuild exe vì `requirements.txt` được đọc runtime, nhưng nếu user đã có `.venv` cũ từ trước sẽ không tự có `semopy` — cần xóa `.venv` hoặc tự `pip install semopy` thủ công để dùng tab CFA).
 
 ## Việc còn dở / chưa test hết
 

@@ -117,6 +117,17 @@ def eta_sq_interpretation_key(eta_sq: float) -> str:
     return "effect.eta.large"
 
 
+def cr_ave(std_loadings) -> tuple:
+    """Composite Reliability and Average Variance Extracted from standardized factor loadings."""
+    loadings = np.asarray(std_loadings, dtype=float)
+    ave = float(np.mean(loadings ** 2))
+    sum_loadings = loadings.sum()
+    sum_residuals = np.sum(1 - loadings ** 2)
+    denom = sum_loadings ** 2 + sum_residuals
+    cr = float((sum_loadings ** 2) / denom) if denom > 0 else np.nan
+    return cr, ave
+
+
 def alpha_interpretation_key(alpha: float) -> str:
     """Return an i18n key suffix describing the Cronbach's Alpha quality band."""
     if alpha >= 0.9:

@@ -44,6 +44,7 @@ GUIDE_VI = r"""
 
 - **Cronbach's Alpha**: đo độ tin cậy nội tại của một nhóm item. Alpha ≥ 0.7 thường được xem là chấp nhận được. Biến có tương quan biến-tổng < 0.3 nên cân nhắc loại bỏ.
 - **EFA (Phân tích nhân tố khám phá)**: kiểm tra KMO/Bartlett trước, xem Scree Plot để chọn số nhân tố, rồi xem ma trận nhân tố (hệ số tải ≥ 0.5 được tô đậm) và phương sai trích.
+- **CFA (Phân tích nhân tố khẳng định)**: khai báo số nhân tố và các biến quan sát thuộc từng nhân tố (thường dựa theo kết quả EFA hoặc lý thuyết), sau đó xem chỉ số phù hợp mô hình (CFI ≥ 0.90, RMSEA ≤ 0.08 là chấp nhận được), hệ số tải chuẩn hóa, độ tin cậy tổng hợp (CR ≥ 0.7), phương sai trích trung bình (AVE ≥ 0.5), và giá trị phân biệt giữa các nhân tố (Fornell–Larcker).
 
 ### 6. Kiểm định Giả thuyết (Hypothesis Testing)
 
@@ -76,7 +77,7 @@ GUIDE_VI = r"""
 
 ### Mẹo nhỏ
 
-- Xử lý dữ liệu khuyết **trước** khi chạy EFA/Cronbach's Alpha để tránh mất quá nhiều quan sát.
+- Xử lý dữ liệu khuyết **trước** khi chạy EFA/CFA/Cronbach's Alpha để tránh mất quá nhiều quan sát.
 - Nếu Shapiro-Wilk báo dữ liệu không chuẩn (p < 0.05) và cỡ mẫu nhỏ, cân nhắc dùng kiểm định phi tham số tương ứng thay vì T-Test/ANOVA.
 - Nhật ký xử lý (expander "Processing log" cuối trang Biến đổi Dữ liệu) ghi lại mọi thao tác đã làm trong phiên — hữu ích để kiểm tra lại quy trình.
 """
@@ -120,6 +121,7 @@ GUIDE_EN = r"""
 
 - **Cronbach's Alpha**: measures the internal-consistency reliability of a group of items. Alpha ≥ 0.7 is usually considered acceptable. Items with a corrected item-total correlation < 0.3 are candidates for removal.
 - **EFA (Exploratory Factor Analysis)**: check KMO/Bartlett first, use the Scree Plot to pick the number of factors, then review the component matrix (loadings ≥ 0.5 are bolded) and variance explained.
+- **CFA (Confirmatory Factor Analysis)**: specify the number of factors and which items belong to each (usually based on EFA results or theory), then review the model fit indices (CFI ≥ 0.90, RMSEA ≤ 0.08 is acceptable), standardized loadings, Composite Reliability (CR ≥ 0.7), Average Variance Extracted (AVE ≥ 0.5), and discriminant validity between factors (Fornell–Larcker criterion).
 
 ### 6. Hypothesis Testing
 
@@ -152,7 +154,7 @@ GUIDE_EN = r"""
 
 ### Tips
 
-- Handle missing data **before** running EFA/Cronbach's Alpha to avoid losing too many observations.
+- Handle missing data **before** running EFA/CFA/Cronbach's Alpha to avoid losing too many observations.
 - If Shapiro-Wilk reports non-normal data (p < 0.05) and the sample is small, consider the matching non-parametric test instead of a T-Test/ANOVA.
 - The processing log (the "Processing log" expander at the bottom of the Data Management page) records every action taken this session — useful for double-checking your workflow.
 """
