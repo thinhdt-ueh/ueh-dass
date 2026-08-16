@@ -30,3 +30,21 @@ docker-compose.yml
 # Local scratch/test artifacts
 _*.py
 *_test_report.docx
+*.zip
+
+# Windows-only launcher (build artifacts + compiled binary; irrelevant in Linux container)
+DASS.exe
+launcher.py
+build/
+dist/
+*.spec
+assets/logo-ueh.ico
+
+# Tests / dev-only (not needed to run the app)
+tests/
+.pytest_cache/
+requirements-dev.txt
+pytest.ini
+
+# Docs (not needed at runtime)
+docs/
