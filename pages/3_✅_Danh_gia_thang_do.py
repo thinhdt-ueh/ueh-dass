@@ -233,6 +233,11 @@ with tab_efa:
     if n_factor_mode == t("sc.efa.mode_manual"):
         n_factor_manual = st.number_input(t("sc.efa.n_factors_label"), min_value=1, max_value=max(len(items) - 1, 1), value=2, step=1)
 
+    suppress_threshold = st.number_input(
+        t("sc.efa.suppress_threshold_label"), min_value=0.0, max_value=0.9, value=0.4, step=0.05,
+        key="efa_suppress_threshold",
+    )
+
     efa_add_report = st.checkbox(t("report.add_checkbox"), key="efa_add_report")
 
     if len(items) < 3:
@@ -289,6 +294,32 @@ with tab_efa:
 
         st.dataframe(loadings.style.format("{:.3f}").map(_highlight), width="stretch")
 
+        # ---- Sorted & suppressed matrix (SPSS "sort by size, suppress small
+        # coefficients" style): items grouped by their dominant factor, sorted
+        # by loading magnitude within each group, weak loadings blanked out. ----
+        dominant_col = loadings.abs().idxmax(axis=1)
+        dominant_idx = dominant_col.map(factor_cols.index)
+        dominant_val = loadings.abs().max(axis=1)
+        sort_order = pd.DataFrame({"dominant_idx": dominant_idx, "dominant_val": dominant_val})
+        sorted_items = sort_order.sort_values(["dominant_idx", "dominant_val"], ascending=[True, False]).index.tolist()
+        sorted_loadings = loadings.loc[sorted_items]
+        suppressed = sorted_loadings.where(sorted_loadings.abs() >= suppress_threshold)
+
+        def _fmt_blank(v):
+            return "" if pd.isna(v) else f"{v:.3f}"
+
+        def _highlight_row_max(row):
+            styles = [""] * len(row)
+            if row.notna().any():
+                idx = row.index.get_loc(row.abs().idxmax())
+                styles[idx] = "font-weight: bold; color: #d62728"
+            return styles
+
+        st.markdown(f"##### {t('sc.efa.sorted_matrix_title')}")
+        st.caption(t("sc.efa.sorted_matrix_caption", threshold=f"{suppress_threshold:.2f}"))
+        styled_sorted = suppressed.style.format(_fmt_blank).apply(_highlight_row_max, axis=1)
+        st.dataframe(styled_sorted, width="stretch")
+
         communalities = pd.Series(fa.get_communalities(), index=items, name="Communality")
         st.markdown(f"##### {t('sc.efa.communalities_title')}")
         st.dataframe(communalities.round(3).to_frame(), width="stretch")
@@ -315,6 +346,11 @@ with tab_efa:
                 [
                     ("text", f"KMO = {kmo_model:.3f}; Bartlett's χ² = {chi2_b:.3f}, p = {p_b:.4f}; {n_factors} factor(s)"),
                     ("table", loadings.round(3).reset_index().rename(columns={"index": t("home.var_name")})),
+                    (
+                        "table",
+                        suppressed.map(lambda v: "" if pd.isna(v) else round(float(v), 3))
+                        .reset_index().rename(columns={"index": t("home.var_name")}),
+                    ),
                     ("table", communalities.round(3).to_frame().reset_index().rename(columns={"index": t("home.var_name")})),
                     ("table", var_df.round(3).reset_index().rename(columns={"index": ""})),
                 ],

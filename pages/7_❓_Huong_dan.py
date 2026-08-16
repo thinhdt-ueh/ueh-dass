@@ -43,7 +43,7 @@ GUIDE_VI = r"""
 ### 5. Đánh giá Thang đo (Scale Evaluation)
 
 - **Cronbach's Alpha**: đo độ tin cậy nội tại của một nhóm item. Alpha ≥ 0.7 thường được xem là chấp nhận được. Biến có tương quan biến-tổng < 0.3 nên cân nhắc loại bỏ.
-- **EFA (Phân tích nhân tố khám phá)**: kiểm tra KMO/Bartlett trước, xem Scree Plot để chọn số nhân tố, rồi xem ma trận nhân tố (hệ số tải ≥ 0.5 được tô đậm) và phương sai trích.
+- **EFA (Phân tích nhân tố khám phá)**: kiểm tra KMO/Bartlett trước, xem Scree Plot để chọn số nhân tố, rồi xem ma trận nhân tố (hệ số tải ≥ 0.5 được tô đậm) và phương sai trích. Bên dưới còn có **bảng đã sắp xếp & ẩn hệ số nhỏ** (kiểu SPSS "sort by size, suppress small coefficients") — biến được nhóm theo nhân tố tải mạnh nhất, có thể chỉnh ngưỡng ẩn.
 - **CFA (Phân tích nhân tố khẳng định)**: khai báo số nhân tố và các biến quan sát thuộc từng nhân tố (thường dựa theo kết quả EFA hoặc lý thuyết), sau đó xem chỉ số phù hợp mô hình (CFI ≥ 0.90, RMSEA ≤ 0.08 là chấp nhận được), hệ số tải chuẩn hóa, độ tin cậy tổng hợp (CR ≥ 0.7), phương sai trích trung bình (AVE ≥ 0.5), và giá trị phân biệt giữa các nhân tố (Fornell–Larcker).
 
 ### 6. Kiểm định Giả thuyết (Hypothesis Testing)
@@ -120,7 +120,7 @@ GUIDE_EN = r"""
 ### 5. Scale Evaluation
 
 - **Cronbach's Alpha**: measures the internal-consistency reliability of a group of items. Alpha ≥ 0.7 is usually considered acceptable. Items with a corrected item-total correlation < 0.3 are candidates for removal.
-- **EFA (Exploratory Factor Analysis)**: check KMO/Bartlett first, use the Scree Plot to pick the number of factors, then review the component matrix (loadings ≥ 0.5 are bolded) and variance explained.
+- **EFA (Exploratory Factor Analysis)**: check KMO/Bartlett first, use the Scree Plot to pick the number of factors, then review the component matrix (loadings ≥ 0.5 are bolded) and variance explained. Below it there's also a **sorted & suppressed matrix** (SPSS-style "sort by size, suppress small coefficients") - items grouped by their dominant factor, with an adjustable suppression threshold.
 - **CFA (Confirmatory Factor Analysis)**: specify the number of factors and which items belong to each (usually based on EFA results or theory), then review the model fit indices (CFI ≥ 0.90, RMSEA ≤ 0.08 is acceptable), standardized loadings, Composite Reliability (CR ≥ 0.7), Average Variance Extracted (AVE ≥ 0.5), and discriminant validity between factors (Fornell–Larcker criterion).
 
 ### 6. Hypothesis Testing
