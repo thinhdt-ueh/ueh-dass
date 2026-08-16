@@ -289,6 +289,12 @@ TRANSLATIONS["vi"].update({
     "sc.cfa.diagram_mode_std": "Chuẩn hóa (Standardized)",
     "sc.cfa.diagram_mode_unstd": "Chưa chuẩn hóa (Unstandardized, kiểu AMOS)",
     "sc.cfa.diagram_caption": "Số trên mũi tên thẳng = hệ số tải & phương sai sai số/nhân tố. Số trên đường cong hai chiều = hiệp phương sai (hoặc tương quan) giữa các nhân tố.",
+    "sc.cfa.estimator_label": "Phương pháp ước lượng",
+    "sc.cfa.estimator_ml": "ML (Maximum Likelihood)",
+    "sc.cfa.estimator_dwls": "DWLS + Polychoric (khuyến nghị cho thang đo Likert)",
+    "sc.cfa.estimator_dwls_note": "DWLS dùng ma trận tương quan polychoric, phù hợp hơn ML cho dữ liệu thứ bậc (Likert) — có thể mất thêm vài giây/phút để tính với nhiều biến.",
+    "sc.cfa.warn_many_categories": "⚠️ Biến sau có hơn 15 giá trị khác nhau, có thể không phù hợp để xem là thang đo Likert thứ bậc (nên cân nhắc dùng ML): {vars}",
+    "sc.cfa.computing_polychoric": "Đang tính ma trận tương quan polychoric...",
 
     # HYPOTHESIS TESTING PAGE
     "ht.ind.tab": "Independent Samples T-Test",
@@ -738,6 +744,12 @@ TRANSLATIONS["en"].update({
     "sc.cfa.diagram_mode_std": "Standardized",
     "sc.cfa.diagram_mode_unstd": "Unstandardized (AMOS-style)",
     "sc.cfa.diagram_caption": "Numbers on straight arrows = loadings & error/factor variances. Numbers on curved double-headed arrows = factor covariances (or correlations).",
+    "sc.cfa.estimator_label": "Estimation method",
+    "sc.cfa.estimator_ml": "ML (Maximum Likelihood)",
+    "sc.cfa.estimator_dwls": "DWLS + Polychoric (recommended for Likert scales)",
+    "sc.cfa.estimator_dwls_note": "DWLS uses a polychoric correlation matrix, more appropriate than ML for ordinal (Likert) data - may take a few extra seconds/minutes to compute with many items.",
+    "sc.cfa.warn_many_categories": "⚠️ The following item(s) have more than 15 distinct values and may not be a good fit for an ordinal Likert scale (consider using ML instead): {vars}",
+    "sc.cfa.computing_polychoric": "Computing the polychoric correlation matrix...",
 
     # HYPOTHESIS TESTING PAGE
     "ht.ind.tab": "Independent Samples T-Test",

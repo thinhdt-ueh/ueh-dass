@@ -125,6 +125,42 @@ def draw_cfa_diagram(factor_specs, ins: pd.DataFrame, standardized: bool = False
     fig.tight_layout()
     return fig
 
+
+def _patch_semopy_bivariate_cdf():
+    """semopy.polycorr.bivariate_cdf calls scipy.stats.mvn.mvnun, which scipy
+    removed (deprecated sub-module, no longer has that attribute). Replace it
+    with an equivalent rectangle-probability computation via the current
+    scipy.stats.multivariate_normal API (same math, inclusion-exclusion over
+    the bivariate normal CDF). Idempotent - safe to call on every run."""
+    import semopy.polycorr as _pc
+    from scipy.stats import multivariate_normal as _mvn
+
+    def _bivariate_cdf_fixed(lower, upper, r):
+        r = float(np.clip(r, -0.999999, 0.999999))
+        dist = _mvn(mean=[0, 0], cov=[[1, r], [r, 1]])
+        return (dist.cdf(upper) - dist.cdf([upper[0], lower[1]])
+                - dist.cdf([lower[0], upper[1]]) + dist.cdf(lower))
+
+    _pc.bivariate_cdf = _bivariate_cdf_fixed
+
+
+def polychoric_cov(data: pd.DataFrame, items: list) -> pd.DataFrame:
+    """Pairwise polychoric correlation matrix for ordinal (Likert) items.
+    Bypasses semopy.polycorr.hetcor(), which has its own separate bug (indexes
+    a transposed DataFrame column-style after transposing it to row-style)."""
+    _patch_semopy_bivariate_cdf()
+    from semopy.polycorr import polychoric_corr
+
+    n_items = len(items)
+    mat = np.eye(n_items)
+    arrays = {it: data[it].to_numpy(dtype=float) for it in items}
+    for i in range(n_items):
+        for j in range(i + 1, n_items):
+            r = polychoric_corr(arrays[items[i]], arrays[items[j]])
+            mat[i, j] = mat[j, i] = r
+    return pd.DataFrame(mat, index=items, columns=items)
+
+
 st.title(f"✅ {t('nav.scale')}")
 require_data()
 df = get_df()
@@ -308,6 +344,15 @@ with tab_cfa:
         fitems = c2.multiselect(t("sc.cfa.factor_items_label", name=fname), numeric_columns(df), key=f"cfa_items_{i}")
         factor_specs.append((fname, fitems))
 
+    estimator_choice = st.radio(
+        t("sc.cfa.estimator_label"),
+        [t("sc.cfa.estimator_ml"), t("sc.cfa.estimator_dwls")],
+        key="cfa_estimator", horizontal=True,
+    )
+    use_dwls = estimator_choice == t("sc.cfa.estimator_dwls")
+    if use_dwls:
+        st.caption(t("sc.cfa.estimator_dwls_note"))
+
     cfa_add_report = st.checkbox(t("report.add_checkbox"), key="cfa_add_report")
 
     if st.button(t("sc.cfa.run_btn"), key="btn_cfa"):
@@ -338,9 +383,19 @@ with tab_cfa:
             st.markdown(f"##### {t('sc.cfa.model_spec_title')}")
             st.code(model_desc, language="text")
 
+            if use_dwls:
+                many_cats = [it for it in all_items if cfa_data[it].nunique() > 15]
+                if many_cats:
+                    st.warning(t("sc.cfa.warn_many_categories", vars=", ".join(many_cats)))
+
             try:
                 model = semopy.Model(model_desc)
-                model.fit(cfa_data)
+                if use_dwls:
+                    with st.spinner(t("sc.cfa.computing_polychoric")):
+                        poly_cov = polychoric_cov(cfa_data, all_items)
+                    model.fit(data=cfa_data, cov=poly_cov, obj="DWLS")
+                else:
+                    model.fit(cfa_data)
                 ins = model.inspect(std_est=True)
                 stats_df = semopy.calc_stats(model)
             except Exception as e:
@@ -514,6 +569,7 @@ with tab_cfa:
             if cfa_add_report:
                 blocks = [
                     ("text", f"Model: {model_desc}"),
+                    ("text", f"Estimator: {'DWLS + Polychoric' if use_dwls else 'ML'}"),
                     (
                         "text",
                         f"χ²({dof:.0f}) = {chi2:.3f}, p = {chi2_p:.4f}; "

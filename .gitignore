@@ -21,6 +21,7 @@ Thumbs.db
 # Local scratch/test artifacts
 _*.py
 *_test_report.docx
+.pytest_cache/
 
 # PyInstaller build output (regenerate with: pyinstaller --onefile --console --name DASS --icon assets/logo-ueh.ico launcher.py)
 build/

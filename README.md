@@ -58,6 +58,15 @@ File build ra nằm trong thư mục `dist/`, copy ra thư mục gốc của d�
 
 Toàn bộ giao diện (nhãn, nút bấm, tiêu đề trang, thông báo kết quả) hỗ trợ song ngữ Việt/Anh thông qua `utils/i18n.py`. Chuyển ngôn ngữ ở dropdown 🌐 đầu sidebar — áp dụng ngay lập tức trên toàn bộ ứng dụng, kể cả tên các trang trong menu điều hướng và cả bộ dữ liệu mẫu. Nội dung do người dùng nhập/đặt tên (tên biến, nhãn, giá trị dữ liệu thật) không bị dịch.
 
+## Kiểm thử (Testing)
+
+```bash
+pip install -r requirements-dev.txt
+pytest
+```
+
+Bộ test (`tests/`) gồm: kiểm tra khớp key song ngữ VI/EN, unit test cho các hàm thống kê (`utils/stats.py`), smoke test mọi trang (có/không có dữ liệu), và test riêng cho CFA (fit tốt/xấu, 1 nhân tố, lỗi validate, ước lượng DWLS+Polychoric, xuất Word).
+
 ## Cấu trúc dự án
 
 ```

@@ -1,6 +1,6 @@
 # DASS — Claude Handover
 
-Tài liệu bàn giao trạng thái dự án, để phiên làm việc sau (người hoặc Claude) tiếp tục mà không phải hỏi lại từ đầu. Cập nhật lần cuối: 2026-08-16.
+Tài liệu bàn giao trạng thái dự án, để phiên làm việc sau (người hoặc Claude) tiếp tục mà không phải hỏi lại từ đầu. Cập nhật lần cuối: 2026-08-16 (phiên 2).
 
 ## Dự án là gì
 
@@ -43,11 +43,19 @@ Thêm tab thứ 3 vào `pages/3_✅_Danh_gia_thang_do.py` (cùng file với Cron
 - Đã test kỹ bằng `AppTest`: dữ liệu tương quan tốt (fit indices ra đúng ngưỡng "tốt"), dữ liệu random/không có cấu trúc (fit indices ra đúng ngưỡng "kém", kể cả case CFI/TLI âm — hợp lệ về mặt toán học khi model quá tệ), case 1 nhân tố (bỏ qua phần ma trận tương quan), case validate lỗi (factor thiếu item). Đã verify `build_docx_bytes()` xuất Word thành công với đủ 4 bảng.
 - **Chưa test**: `DASS.exe` chưa được rebuild/test lại với `semopy` trong self-provisioning venv (không cần rebuild exe vì `requirements.txt` được đọc runtime, nhưng nếu user đã có `.venv` cũ từ trước sẽ không tự có `semopy` — cần xóa `.venv` hoặc tự `pip install semopy` thủ công để dùng tab CFA).
 
+## Cập nhật 2026-08-16 (phiên 2): DWLS estimator cho CFA + test suite persisted
+
+Sau khi thêm CFA (xem mục trên), user hỏi "còn nên sửa gì nữa" — đề xuất 3 việc, user đồng ý làm cả 3:
+
+1. **DWLS + Polychoric estimator cho CFA** (mục `sc.cfa.estimator_*` trong CFA tab) — vì dữ liệu khảo sát Likert là ordinal, ML thuần không lý tưởng bằng WLSMV/DWLS. Phát hiện **2 lỗi tương thích ngược thật sự** trong `semopy 2.3.11` với numpy/scipy hiện tại (xem Gotcha #6 bên dưới) — đã tự viết workaround (`polychoric_cov()` + monkeypatch `bivariate_cdf` trong `pages/3_✅_Danh_gia_thang_do.py`), verify bằng cách so sánh polychoric vs Pearson correlation (polychoric phải luôn ≥ Pearson về độ lớn — đúng như lý thuyết) trước khi tích hợp vào UI.
+2. **Test suite `pytest` persisted trong `tests/`** — 49 test, tất cả pass: `test_i18n.py` (VI/EN parity + duplicate-key check, thay thế script ad-hoc trước đây), `test_stats.py` (unit test các hàm trong `utils/stats.py`), `test_pages_smoke.py` (mọi trang load được, có/không có data), `test_cfa.py` (fit tốt, 1 nhân tố, validate lỗi, Arrow-safety, DWLS, xuất docx), `test_report.py` (build_docx_bytes với text/table/image block). Chạy bằng `pip install -r requirements-dev.txt && pytest`. `pytest.ini` dùng `pythonpath = .` để import `utils.*` không cần hack `sys.path`.
+3. **Docker vẫn CHƯA build/run thử thật** — máy dev này (và có thể máy user) **không có Docker cài sẵn** (`docker --version` → not found). Cài Docker Desktop trên Windows là việc nặng (cần WSL2/Hyper-V, quyền admin, khả năng phải reboot) nên **không tự ý cài** — nếu user muốn verify Docker, cần họ tự cài hoặc xác nhận cho phép cài.
+
 ## Việc còn dở / chưa test hết
 
-- **Docker chưa được build/run thử thật** trên bất kỳ máy nào (kể cả máy dev) — chỉ mới viết + review code. Nếu build thật gặp lỗi (khả nghi nhất: `pyreadstat` cần compile trên slim image dù đã cài `build-essential`), cần fix.
-- **`DASS.exe` chưa được user tự tay double-click chạy sau bản fix Store-Python mới nhất** (`fdf9a12`) — mới chỉ verify bằng cách tôi tự copy project sang thư mục test và chạy exe qua Bash tool, chưa có xác nhận trực tiếp từ user rằng máy Desktop của họ (nơi báo lỗi) đã chạy được sau khi cài Python thật từ python.org. **Cần user xác nhận lại** sau khi cài Python và chạy lại exe.
-- Repo hiện có các file `.zip` lớn (~300MB) nằm trong thư mục dự án nhưng **không được track bởi git** (`UEH-DASS.zip` → `utils.zip` → `UEH-DASS_src.zip`, tên đổi qua vài lần, nhiều khả năng là user tự backup/zip thủ công qua File Explorer). Không đụng vào các file này, chỉ note lại để biết chúng không phải rác do Claude tạo ra.
+- **Docker chưa được build/run thử thật** trên bất kỳ máy nào — không có Docker trên máy dev để test, và việc cài Docker Desktop là thay đổi hệ thống nặng nên chưa tự ý làm. Nếu build thật gặp lỗi (khả nghi nhất: `pyreadstat` cần compile trên slim image dù đã cài `build-essential`), cần fix.
+- **`DASS.exe` chưa được user tự tay double-click chạy sau bản fix Store-Python** (`fdf9a12`) — mới chỉ verify bằng cách tôi tự copy project sang thư mục test và chạy exe qua Bash tool, chưa có xác nhận trực tiếp từ user rằng máy Desktop của họ (nơi báo lỗi) đã chạy được sau khi cài Python thật từ python.org.
+- Repo hiện có các file `.zip` lớn (~300MB) nằm trong thư mục dự án nhưng **không được track bởi git** (tên đổi qua vài lần: `UEH-DASS.zip` → `utils.zip` → `UEH-DASS_src.zip`, nhiều khả năng là user tự backup/zip thủ công qua File Explorer). Không đụng vào các file này, chỉ note lại để biết chúng không phải rác do Claude tạo ra.
 - Chưa có ai yêu cầu thêm tính năng gì mới ngoài các mục ở trên tính đến thời điểm viết tài liệu này.
 
 ## Gotcha kỹ thuật quan trọng (để không lặp lại lỗi cũ)
@@ -57,6 +65,7 @@ Thêm tab thứ 3 vào `pages/3_✅_Danh_gia_thang_do.py` (cùng file với Cron
 3. **`AppTest.session_state.get(...)` không tồn tại** (raises AttributeError) — phải dùng `at.session_state["key"]` + try/except.
 4. **Python bản Microsoft Store không đáng tin cho việc tạo `venv`** trên Windows — xem mục launcher ở trên. Luôn ưu tiên `py -3` / Python cài từ python.org, loại trừ mọi path chứa `WindowsApps`.
 5. **`gh release create` bị chặn bởi permission classifier** của môi trường agent này — nếu cần publish release trong tương lai, phải hỏi user xác nhận trực tiếp hoặc dùng cách commit file thẳng vào repo thay thế.
+6. **`semopy 2.3.11` có 2 lỗi tương thích ngược thật với numpy/scipy mới**: (a) `semopy.polycorr.hetcor()` transpose 1 DataFrame rồi index kiểu cột thay vì kiểu hàng (`data[v]` sau `data = data.T`) → `KeyError` khi truyền `ords` là tên cột thay vì index số; (b) `semopy.polycorr.bivariate_cdf()` gọi `scipy.stats.mvn.mvnun` — API này đã bị scipy xóa hẳn. Cả 2 đều KHÔNG do cách gọi sai của mình — đã verify bằng cách đọc source code trực tiếp. Workaround: tự viết `polychoric_cov()` (bỏ qua `hetcor`, tự loop `polychoric_corr()` từng cặp biến) + monkeypatch `bivariate_cdf` bằng `scipy.stats.multivariate_normal` (toán học tương đương, chỉ đổi API). Xem `pages/3_✅_Danh_gia_thang_do.py`. Cũng phát hiện: `model.fit(cov=..., obj='DWLS')` một mình báo lỗi `'Model' object has no attribute 'mx_data'` — DWLS cần CẢ `data=` lẫn `cov=` cùng lúc (`data` để tính ma trận trọng số tiệm cận, `cov` để làm ma trận mục tiêu).
 
 ## Cấu trúc file chính
 
