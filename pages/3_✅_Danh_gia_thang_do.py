@@ -1,3 +1,9 @@
+import io
+
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.patches import Ellipse, FancyArrowPatch, FancyBboxPatch
 import numpy as np
 import pandas as pd
 import plotly.express as px
@@ -9,6 +15,115 @@ from utils.stats import cronbach_alpha, alpha_interpretation_key, cr_ave
 from utils.i18n import t
 from utils.footer import render_footer
 from utils.report import add_report_entry
+
+
+def draw_cfa_diagram(factor_specs, ins: pd.DataFrame, standardized: bool = False):
+    """AMOS-style CFA path diagram: item boxes + error terms -> latent ellipses,
+    with loadings/variances/covariances labeled. `ins` is semopy's raw
+    Model.inspect() output (original lval/rval/op/Estimate/Est. Std columns)."""
+    est_col = "Est. Std" if standardized else "Estimate"
+    names = [f[0] for f in factor_specs]
+
+    x_err, x_item, x_factor = 0.3, 1.6, 3.6
+    item_h, factor_gap = 0.7, 0.9
+
+    item_positions, factor_positions = {}, {}
+    y_cursor = 0.0
+    for name, items in factor_specs:
+        item_ys = [y_cursor - i * item_h for i in range(len(items))]
+        for it, y in zip(items, item_ys):
+            item_positions[(name, it)] = y
+        factor_positions[name] = sum(item_ys) / len(item_ys)
+        y_cursor = min(item_ys) - factor_gap
+
+    n_factors = len(names)
+    fig_h = max(5.0, (abs(y_cursor) + 2.5) * 0.55)
+    fig_w = max(9.0, 9.0 + 0.35 * n_factors)
+    fig, ax = plt.subplots(figsize=(fig_w, fig_h))
+    ax.set_xlim(-0.3, x_factor + 1.6 + 0.28 * n_factors)
+    ax.set_ylim(y_cursor - 1, 2)
+    ax.set_aspect("equal")
+    ax.axis("off")
+
+    def _val(lval, rval, op):
+        row = ins[(ins["lval"] == lval) & (ins["rval"] == rval) & (ins["op"] == op)]
+        if row.empty:
+            return None
+        v = row.iloc[0][est_col]
+        try:
+            return float(v)
+        except (TypeError, ValueError):
+            return None
+
+    for name, items in factor_specs:
+        fy = factor_positions[name]
+        for it in items:
+            y = item_positions[(name, it)]
+            box = FancyBboxPatch(
+                (x_item - 0.55, y - 0.2), 1.1, 0.4,
+                boxstyle="round,pad=0.02", ec="black", fc="white", zorder=3,
+            )
+            ax.add_patch(box)
+            ax.text(x_item, y, it, ha="center", va="center", fontsize=8, zorder=4)
+
+            ex, ey = x_item - 0.75, y + 0.55
+            err = Ellipse((ex, ey), 0.4, 0.32, ec="black", fc="white", zorder=3)
+            ax.add_patch(err)
+            err_val = _val(it, it, "~~")
+            if err_val is not None:
+                ax.text(ex, ey, f"{err_val:.2f}", fontsize=6, ha="center", va="center", zorder=4)
+            ax.add_patch(FancyArrowPatch(
+                (ex, ey - 0.17), (x_item - 0.45, y + 0.13),
+                arrowstyle="-|>", mutation_scale=8, color="black", zorder=2,
+            ))
+
+            ax.add_patch(FancyArrowPatch(
+                (x_factor - 0.6, fy), (x_item + 0.56, y),
+                arrowstyle="-|>", mutation_scale=10, color="black", shrinkA=2, shrinkB=2, zorder=2,
+            ))
+            lv = _val(it, name, "~")
+            if lv is not None:
+                midx, midy = (x_factor - 0.6 + x_item + 0.56) / 2, (fy + y) / 2
+                ax.text(
+                    midx, midy + 0.1, f"{lv:.2f}", fontsize=7, ha="center", va="center", zorder=4,
+                    bbox=dict(boxstyle="round,pad=0.05", fc="white", ec="none"),
+                )
+
+    for name in names:
+        fy = factor_positions[name]
+        ax.add_patch(Ellipse((x_factor, fy), 1.2, 0.75, ec="black", fc="white", zorder=3))
+        ax.text(x_factor, fy, name, ha="center", va="center", fontsize=10, fontweight="bold", zorder=4)
+        var_val = _val(name, name, "~~")
+        if var_val is not None:
+            ax.text(x_factor + 0.7, fy + 0.42, f"{var_val:.2f}", fontsize=7, ha="left", va="center", zorder=4)
+
+    seen_pairs = set()
+    cov_rows = ins[
+        (ins["op"] == "~~") & (ins["lval"].isin(names)) & (ins["rval"].isin(names)) & (ins["lval"] != ins["rval"])
+    ]
+    for _, r in cov_rows.iterrows():
+        a, b = r["lval"], r["rval"]
+        pair = tuple(sorted([a, b]))
+        if pair in seen_pairs:
+            continue
+        seen_pairs.add(pair)
+        ya, yb = factor_positions[a], factor_positions[b]
+        dist_idx = abs(names.index(a) - names.index(b))
+        rad = 0.12 + 0.10 * dist_idx
+        try:
+            val = float(r[est_col])
+        except (TypeError, ValueError):
+            continue
+        ax.add_patch(FancyArrowPatch(
+            (x_factor + 0.62, ya), (x_factor + 0.62, yb),
+            connectionstyle=f"arc3,rad={rad}",
+            arrowstyle="<->", mutation_scale=8, color="dimgray", lw=0.9, zorder=1,
+        ))
+        label_x = x_factor + 0.62 + rad * abs(yb - ya) * 0.5 + 0.15
+        ax.text(label_x, (ya + yb) / 2, f"{val:.2f}", fontsize=6, ha="center", va="center", zorder=4)
+
+    fig.tight_layout()
+    return fig
 
 st.title(f"✅ {t('nav.scale')}")
 require_data()
@@ -374,6 +489,28 @@ with tab_cfa:
                 else:
                     st.success(t("sc.cfa.discriminant_ok"))
 
+            # ---- Path diagram (AMOS-style) ----
+            st.markdown(f"##### {t('sc.cfa.diagram_title')}")
+            gfi_val = float(stats_row.get("GFI", np.nan))
+            summary_line = (
+                f"Chi-square={chi2:.3f} ; df={dof:.0f} ; P={chi2_p:.3f} ; "
+                f"Chi-square/df={chi2_df_ratio:.3f} ; GFI={gfi_val:.3f} ; TLI={tli:.3f} ; "
+                f"CFI={cfi:.3f} ; RMSEA={rmsea:.3f}"
+            )
+            st.code(summary_line, language="text")
+            diagram_mode = st.radio(
+                t("sc.cfa.diagram_mode_label"),
+                [t("sc.cfa.diagram_mode_unstd"), t("sc.cfa.diagram_mode_std")],
+                key="cfa_diagram_mode", horizontal=True,
+            )
+            diagram_std = diagram_mode == t("sc.cfa.diagram_mode_std")
+            fig_diagram = draw_cfa_diagram(factor_specs, ins, standardized=diagram_std)
+            st.pyplot(fig_diagram)
+            st.caption(t("sc.cfa.diagram_caption"))
+            diagram_png = io.BytesIO()
+            fig_diagram.savefig(diagram_png, format="png", dpi=150, bbox_inches="tight")
+            plt.close(fig_diagram)
+
             if cfa_add_report:
                 blocks = [
                     ("text", f"Model: {model_desc}"),
@@ -388,6 +525,8 @@ with tab_cfa:
                 ]
                 if fl_mat is not None:
                     blocks.append(("table", fl_mat.round(3).reset_index().rename(columns={"index": ""})))
+                blocks.append(("text", summary_line))
+                blocks.append(("image", diagram_png.getvalue()))
                 add_report_entry(f"{t('sc.cfa.tab')} — {', '.join(names)}", blocks)
                 st.toast(t("report.added_toast"))
 

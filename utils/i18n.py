@@ -284,6 +284,11 @@ TRANSLATIONS["vi"].update({
     "sc.cfa.discriminant_note": "Đường chéo là căn bậc hai của AVE (√AVE); các ô còn lại là tương quan giữa các nhân tố. Giá trị phân biệt đạt khi √AVE trên đường chéo lớn hơn mọi tương quan cùng hàng/cột.",
     "sc.cfa.discriminant_ok": "Đạt giá trị phân biệt: √AVE của mọi nhân tố đều lớn hơn tương quan với các nhân tố khác.",
     "sc.cfa.discriminant_fail": "⚠️ Chưa đạt giá trị phân biệt giữa: {pairs}",
+    "sc.cfa.diagram_title": "Sơ đồ đường dẫn (Path Diagram)",
+    "sc.cfa.diagram_mode_label": "Loại hệ số hiển thị trên sơ đồ",
+    "sc.cfa.diagram_mode_std": "Chuẩn hóa (Standardized)",
+    "sc.cfa.diagram_mode_unstd": "Chưa chuẩn hóa (Unstandardized, kiểu AMOS)",
+    "sc.cfa.diagram_caption": "Số trên mũi tên thẳng = hệ số tải & phương sai sai số/nhân tố. Số trên đường cong hai chiều = hiệp phương sai (hoặc tương quan) giữa các nhân tố.",
 
     # HYPOTHESIS TESTING PAGE
     "ht.ind.tab": "Independent Samples T-Test",
@@ -728,6 +733,11 @@ TRANSLATIONS["en"].update({
     "sc.cfa.discriminant_note": "The diagonal is the square root of AVE (√AVE); off-diagonal cells are factor correlations. Discriminant validity holds when the diagonal √AVE exceeds every correlation in its row/column.",
     "sc.cfa.discriminant_ok": "Discriminant validity holds: every factor's √AVE exceeds its correlations with other factors.",
     "sc.cfa.discriminant_fail": "⚠️ Discriminant validity not met between: {pairs}",
+    "sc.cfa.diagram_title": "Path Diagram",
+    "sc.cfa.diagram_mode_label": "Estimates shown on the diagram",
+    "sc.cfa.diagram_mode_std": "Standardized",
+    "sc.cfa.diagram_mode_unstd": "Unstandardized (AMOS-style)",
+    "sc.cfa.diagram_caption": "Numbers on straight arrows = loadings & error/factor variances. Numbers on curved double-headed arrows = factor covariances (or correlations).",
 
     # HYPOTHESIS TESTING PAGE
     "ht.ind.tab": "Independent Samples T-Test",

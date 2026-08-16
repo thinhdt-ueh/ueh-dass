@@ -11,7 +11,8 @@ def init_report_state():
 
 
 def add_report_entry(title: str, blocks: list):
-    """blocks: list of ("text" | "table", content) tuples, content is str or pd.DataFrame."""
+    """blocks: list of ("text" | "table" | "image", content) tuples.
+    content is str for "text", pd.DataFrame for "table", PNG bytes for "image"."""
     init_report_state()
     st.session_state.report.append({"title": title, "blocks": blocks})
 
@@ -54,6 +55,7 @@ def _add_df_table(doc, df: pd.DataFrame):
 
 def build_docx_bytes(report_title: str = "DASS — Analysis Report") -> bytes:
     from docx import Document
+    from docx.shared import Inches
 
     init_report_state()
     doc = Document()
@@ -66,6 +68,8 @@ def build_docx_bytes(report_title: str = "DASS — Analysis Report") -> bytes:
                 doc.add_paragraph(content)
             elif block_type == "table" and isinstance(content, pd.DataFrame):
                 _add_df_table(doc, content)
+            elif block_type == "image":
+                doc.add_picture(io.BytesIO(content), width=Inches(6.3))
         doc.add_paragraph()
 
     buf = io.BytesIO()
